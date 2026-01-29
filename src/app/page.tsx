@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import KetersediaanTab from '@/components/KetersediaanTab';
 import AdminTab from '@/components/AdminTab';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import type { Room, Booking } from '@/types';
 
 export default function HomePage() {
@@ -61,32 +62,7 @@ export default function HomePage() {
     };
 
     if (loading) {
-        return (
-            <div style={{
-                minHeight: '100vh',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-            }}>
-                <div className="text-center">
-                    <div style={{
-                        width: '48px',
-                        height: '48px',
-                        border: '4px solid var(--gray-200)',
-                        borderTopColor: 'var(--primary)',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        margin: '0 auto var(--spacing-md)',
-                    }} />
-                    <p className="text-muted">Memuat...</p>
-                </div>
-                <style jsx>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-            </div>
-        );
+        return <LoadingSpinner fullPage label="Memuat..." />;
     }
 
     return (

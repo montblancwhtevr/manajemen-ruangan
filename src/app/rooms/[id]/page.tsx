@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { FiArrowLeft, FiClock, FiCalendar, FiInfo, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Header from '@/components/Header';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { formatDateIndonesian } from '@/lib/utils';
 import type { Room, Booking } from '@/types';
 
@@ -73,25 +74,7 @@ export default function RoomDetailPage() {
     );
 
     if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center" style={{ minHeight: '100vh' }}>
-                <div className="loader" />
-                <p className="mt-2 text-muted">Memuat detail ruangan...</p>
-                <style jsx>{`
-                    .loader {
-                        width: 48px;
-                        height: 48px;
-                        border: 4px solid var(--gray-200);
-                        border-top-color: var(--primary);
-                        borderRadius: 50%;
-                        animation: spin 1s linear infinite;
-                    }
-                    @keyframes spin {
-                        to { transform: rotate(360deg); }
-                    }
-                `}</style>
-            </div>
-        );
+        return <LoadingSpinner fullPage label="Memuat detail ruangan..." />;
     }
 
     if (!room) {

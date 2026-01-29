@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiLogIn } from 'react-icons/fi';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -103,8 +104,10 @@ export default function LoginPage() {
                         style={{ width: '100%' }}
                         disabled={loading}
                     >
-                        <FiLogIn />
-                        {loading ? 'Memproses...' : 'Login'}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                            {loading ? <LoadingSpinner size="sm" /> : <FiLogIn />}
+                            {loading ? 'Memproses...' : 'Login'}
+                        </div>
                     </button>
                 </form>
 

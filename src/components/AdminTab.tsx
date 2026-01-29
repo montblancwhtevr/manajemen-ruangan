@@ -7,6 +7,7 @@ import 'flatpickr/dist/flatpickr.css';
 import { formatDateIndonesian } from '@/lib/utils';
 import type { Room, Booking } from '@/types';
 import Modal, { ModalType } from './Modal';
+import LoadingSpinner from './LoadingSpinner';
 
 interface AdminTabProps {
     rooms: Room[];
@@ -357,8 +358,10 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                     </div>
 
                     <button type="submit" className="btn btn-primary" disabled={loading}>
-                        <FiPlus />
-                        {loading ? 'Memproses...' : 'Buat Booking'}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {loading ? <LoadingSpinner size="sm" /> : <FiPlus />}
+                            {loading ? 'Memproses...' : 'Buat Booking'}
+                        </div>
                     </button>
                 </form>
             </div>
@@ -512,8 +515,10 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
 
                     <div className="flex gap-2">
                         <button type="submit" className="btn btn-primary" disabled={loading}>
-                            {editingRoom ? <FiSave /> : <FiPlus />}
-                            {editingRoom ? 'Update Ruangan' : 'Tambah Ruangan'}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {loading ? <LoadingSpinner size="sm" /> : (editingRoom ? <FiSave /> : <FiPlus />)}
+                                {editingRoom ? 'Update Ruangan' : 'Tambah Ruangan'}
+                            </div>
                         </button>
                         {editingRoom && (
                             <button
