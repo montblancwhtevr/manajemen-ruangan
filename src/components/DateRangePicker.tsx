@@ -11,8 +11,8 @@ interface DateRangePickerProps {
 export default function DateRangePicker({ onSearch }: DateRangePickerProps) {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
-    const fromPickerRef = useRef<Flatpickr>(null);
-    const toPickerRef = useRef<Flatpickr>(null);
+    const fromPickerRef = useRef<any>(null);
+    const toPickerRef = useRef<any>(null);
 
     const handleSearch = () => {
         if (dateFrom && dateTo) {
