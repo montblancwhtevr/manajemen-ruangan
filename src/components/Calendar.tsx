@@ -14,10 +14,9 @@ const INDONESIAN_MONTHS = [
 interface CalendarProps {
     rooms: Room[];
     bookings: Booking[];
-    onDateClick?: (date: Date) => void;
 }
 
-export default function Calendar({ rooms, bookings, onDateClick }: CalendarProps) {
+export default function Calendar({ rooms, bookings }: CalendarProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
     const monthStart = startOfMonth(currentMonth);
@@ -87,8 +86,7 @@ export default function Calendar({ rooms, bookings, onDateClick }: CalendarProps
                         <div
                             key={day.toISOString()}
                             className={`calendar-day ${(!isCurrentMonth || isPast) ? 'disabled' : ''} ${isTodayDate ? 'today' : ''}`}
-                            style={{ cursor: (isCurrentMonth && !isPast) ? 'pointer' : 'default' }}
-                            onClick={() => isCurrentMonth && !isPast && onDateClick?.(day)}
+                            style={{ cursor: 'default' }}
                         >
                             <span className="day-number">{format(day, 'd')}</span>
                             <div className="day-indicators">

@@ -33,10 +33,6 @@ export default function KetersediaanTab({ rooms, allBookings }: KetersediaanTabP
         filterBookings(dateFrom, dateTo, roomId);
     };
 
-    const handleDateClick = (date: Date) => {
-        const dateString = formatDate(date);
-        router.push(`/bookings/${dateString}`);
-    };
 
     const filterBookings = (from: string, to: string, roomId: string) => {
         const today = formatDate(new Date());
@@ -67,7 +63,6 @@ export default function KetersediaanTab({ rooms, allBookings }: KetersediaanTabP
                     <Calendar
                         rooms={rooms}
                         bookings={filteredBookings}
-                        onDateClick={handleDateClick}
                     />
                 </div>
 
