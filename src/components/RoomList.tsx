@@ -1,15 +1,16 @@
-'use client';
-
-import Link from 'next/link';
+import { useState } from 'react';
+import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import RoomDetailInline from './RoomDetailInline';
 import type { Room, Booking } from '@/types';
 
 interface RoomListProps {
     rooms: Room[];
     bookings: Booking[];
-    onRoomClick?: (room: Room) => void;
 }
 
-export default function RoomList({ rooms, bookings, onRoomClick }: RoomListProps) {
+export default function RoomList({ rooms, bookings }: RoomListProps) {
+    const [expandedRoomId, setExpandedRoomId] = useState<string | null>(null);
+
     const getRoomStatus = (roomId: string): 'available' | 'booked' | 'partial' => {
         const roomBookings = bookings.filter(b => b.roomId === roomId);
 
@@ -45,51 +46,79 @@ export default function RoomList({ rooms, bookings, onRoomClick }: RoomListProps
         );
     }
 
-    const today = new Date().toISOString().split('T')[0];
-
     return (
         <div className="room-list">
             {rooms.map(room => {
                 const status = getRoomStatus(room.id);
+                const isExpanded = expandedRoomId === room.id;
 
                 return (
-                    <Link
+                    <div
                         key={room.id}
-                        href={`/rooms/${room.id}`}
-                        className="room-item"
-                        style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
-                        onClick={() => onRoomClick?.(room)}
+                        className={`room-item-accordion ${isExpanded ? 'expanded' : ''}`}
+                        style={{
+                            background: 'var(--bg-primary)',
+                            borderRadius: 'var(--radius-md)',
+                            border: '1px solid var(--border-color)',
+                            marginBottom: 'var(--spacing-sm)',
+                            overflow: 'hidden',
+                            transition: 'all 0.3s ease'
+                        }}
                     >
                         <div
-                            className="room-indicator"
+                            className="room-item-header"
                             style={{
-                                backgroundColor: room.color,
-                                boxShadow: `0 0 10px ${room.color}44`
+                                padding: 'var(--spacing-md)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 'var(--spacing-md)'
                             }}
-                        />
-                        <div className="room-info" style={{ flex: 1 }}>
-                            <div className="flex justify-between items-center">
-                                <div className="room-name">{room.name}</div>
-                                <span
-                                    className={`status-badge status-${status}`}
-                                    style={{
-                                        fontSize: '0.75rem',
-                                        padding: '2px 8px',
-                                        borderRadius: '12px',
-                                        background: status === 'available' ? 'var(--gray-100)' :
-                                            status === 'booked' ? 'var(--danger-light)' : 'var(--warning-light)',
-                                        color: status === 'available' ? 'var(--gray-600)' :
-                                            status === 'booked' ? 'var(--danger)' : 'var(--warning)',
-                                    }}
-                                >
-                                    {getStatusText(status)}
-                                </span>
+                            onClick={() => setExpandedRoomId(isExpanded ? null : room.id)}
+                        >
+                            <div
+                                className="room-indicator"
+                                style={{
+                                    width: '12px',
+                                    height: '12px',
+                                    borderRadius: '50%',
+                                    backgroundColor: room.color,
+                                    boxShadow: `0 0 10px ${room.color}44`
+                                }}
+                            />
+                            <div className="room-info" style={{ flex: 1 }}>
+                                <div className="flex justify-between items-center">
+                                    <div className="room-name" style={{ fontWeight: 600 }}>{room.name}</div>
+                                    <div className="flex items-center gap-2">
+                                        <span
+                                            className={`status-badge status-${status}`}
+                                            style={{
+                                                fontSize: '0.7rem',
+                                                padding: '2px 8px',
+                                                borderRadius: '12px',
+                                                background: status === 'available' ? 'var(--gray-100)' :
+                                                    status === 'booked' ? 'var(--danger-light)' : 'var(--warning-light)',
+                                                color: status === 'available' ? 'var(--gray-600)' :
+                                                    status === 'booked' ? 'var(--danger)' : 'var(--warning)',
+                                            }}
+                                        >
+                                            {getStatusText(status)}
+                                        </span>
+                                        {isExpanded ? <FiChevronUp className="text-muted" /> : <FiChevronDown className="text-muted" />}
+                                    </div>
+                                </div>
+                                {room.description && (
+                                    <div className="room-description" style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                        {room.description}
+                                    </div>
+                                )}
                             </div>
-                            {room.description && (
-                                <div className="room-description">{room.description}</div>
-                            )}
                         </div>
-                    </Link>
+
+                        {isExpanded && (
+                            <RoomDetailInline room={room} />
+                        )}
+                    </div>
                 );
             })}
         </div>

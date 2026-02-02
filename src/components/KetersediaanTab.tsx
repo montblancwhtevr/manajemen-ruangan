@@ -68,7 +68,10 @@ export default function KetersediaanTab({ rooms, allBookings }: KetersediaanTabP
 
                 <div>
                     <h3 className="mb-2">Daftar Ruangan</h3>
-                    <RoomList rooms={displayedRooms} bookings={filteredBookings} />
+                    <RoomList
+                        rooms={displayedRooms}
+                        bookings={filteredBookings}
+                    />
                 </div>
             </div>
         </div>
