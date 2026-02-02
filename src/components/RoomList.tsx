@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import RoomDetail from './RoomDetail';
+import RoomDetail from '@/components/RoomDetailComponent';
 import type { Room, Booking } from '@/types';
 
 interface RoomListProps {
