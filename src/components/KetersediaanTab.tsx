@@ -7,7 +7,6 @@ import RoomSelector from './RoomSelector';
 import Calendar from './Calendar';
 import RoomList from './RoomList';
 import type { Room, Booking } from '@/types';
-import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 
 interface KetersediaanTabProps {
@@ -16,7 +15,6 @@ interface KetersediaanTabProps {
 }
 
 export default function KetersediaanTab({ rooms, allBookings }: KetersediaanTabProps) {
-    const router = useRouter();
     const [selectedRoomId, setSelectedRoomId] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
