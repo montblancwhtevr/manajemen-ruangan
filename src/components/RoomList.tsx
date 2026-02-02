@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import RoomDetailInline from '@/components/RoomDetailInline';
+import RoomDetail from './RoomDetail';
 import type { Room, Booking } from '@/types';
 
 interface RoomListProps {
@@ -118,7 +118,7 @@ export default function RoomList({ rooms, bookings }: RoomListProps) {
                         </div>
 
                         {isExpanded && (
-                            <RoomDetailInline room={room} />
+                            <RoomDetail room={room} />
                         )}
                     </div>
                 );
