@@ -40,9 +40,9 @@ export async function POST(request: NextRequest) {
         await requireAdmin();
         const session = await getSession();
         const body = await request.json();
-        const { roomId, date, timeFrom, timeTo, purpose } = body;
+        const { roomId, date, timeFrom, timeTo, purpose, isPriority } = body;
 
-        if (!roomId || !date || !timeFrom || !timeTo) {
+        if (!roomId || !date || !timeFrom || !timeTo || isPriority === undefined) {
             return NextResponse.json(
                 { success: false, error: 'Semua field wajib harus diisi' },
                 { status: 400 }
@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
             timeFrom,
             timeTo,
             purpose: purpose || '',
+            isPriority: isPriority,
             createdBy: session?.email || 'unknown',
         });
 

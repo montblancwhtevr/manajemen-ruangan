@@ -100,7 +100,7 @@ export async function getAllBookings(): Promise<Booking[]> {
         SELECT 
             b.id, b.room_id as "roomId", r.name as "roomName",
             b.date, b.time_from as "timeFrom", b.time_to as "timeTo",
-            b.purpose, b.created_by as "createdBy", b.created_at as "createdAt"
+            b.purpose, b.is_priority as "isPriority", b.created_by as "createdBy", b.created_at as "createdAt"
         FROM bookings b
         LEFT JOIN rooms r ON b.room_id = r.id
         ORDER BY b.date DESC, b.time_from DESC
@@ -121,7 +121,7 @@ export async function getBookingById(id: string): Promise<Booking | undefined> {
         SELECT 
             b.id, b.room_id as "roomId", r.name as "roomName",
             b.date, b.time_from as "timeFrom", b.time_to as "timeTo",
-            b.purpose, b.created_by as "createdBy", b.created_at as "createdAt"
+            b.purpose, b.is_priority as "isPriority", b.created_by as "createdBy", b.created_at as "createdAt"
         FROM bookings b
         LEFT JOIN rooms r ON b.room_id = r.id
         WHERE b.id = ${parseInt(id)}
@@ -177,21 +177,21 @@ export async function getBookingsByFilters(filters: {
     let result;
     if (filters.dateFrom && filters.dateTo && filters.roomId) {
         result = await sql`
-            SELECT b.id, b.room_id as "roomId", r.name as "roomName", b.date, b.time_from as "timeFrom", b.time_to as "timeTo", b.purpose, b.created_by as "createdBy", b.created_at as "createdAt"
+            SELECT b.id, b.room_id as "roomId", r.name as "roomName", b.date, b.time_from as "timeFrom", b.time_to as "timeTo", b.purpose, b.is_priority as "isPriority", b.created_by as "createdBy", b.created_at as "createdAt"
             FROM bookings b LEFT JOIN rooms r ON b.room_id = r.id
             WHERE b.date >= ${filters.dateFrom} AND b.date <= ${filters.dateTo} AND b.room_id = ${parseInt(filters.roomId)}
             ORDER BY b.date DESC, b.time_from DESC
         `;
     } else if (filters.dateFrom && filters.dateTo) {
         result = await sql`
-            SELECT b.id, b.room_id as "roomId", r.name as "roomName", b.date, b.time_from as "timeFrom", b.time_to as "timeTo", b.purpose, b.created_by as "createdBy", b.created_at as "createdAt"
+            SELECT b.id, b.room_id as "roomId", r.name as "roomName", b.date, b.time_from as "timeFrom", b.time_to as "timeTo", b.purpose, b.is_priority as "isPriority", b.created_by as "createdBy", b.created_at as "createdAt"
             FROM bookings b LEFT JOIN rooms r ON b.room_id = r.id
             WHERE b.date >= ${filters.dateFrom} AND b.date <= ${filters.dateTo}
             ORDER BY b.date DESC, b.time_from DESC
         `;
     } else if (filters.roomId) {
         result = await sql`
-            SELECT b.id, b.room_id as "roomId", r.name as "roomName", b.date, b.time_from as "timeFrom", b.time_to as "timeTo", b.purpose, b.created_by as "createdBy", b.created_at as "createdAt"
+            SELECT b.id, b.room_id as "roomId", r.name as "roomName", b.date, b.time_from as "timeFrom", b.time_to as "timeTo", b.purpose, b.is_priority as "isPriority", b.created_by as "createdBy", b.created_at as "createdAt"
             FROM bookings b LEFT JOIN rooms r ON b.room_id = r.id
             WHERE b.room_id = ${parseInt(filters.roomId)}
             ORDER BY b.date DESC, b.time_from DESC
@@ -215,6 +215,7 @@ export async function createBooking(data: {
     timeFrom: string;
     timeTo: string;
     purpose: string;
+    isPriority: boolean;
     createdBy: string;
 }): Promise<{ success: boolean; booking?: Booking; error?: string }> {
     // Check for conflicts in SQL
@@ -232,13 +233,83 @@ export async function createBooking(data: {
     }
 
     const result = await sql`
-        INSERT INTO bookings (room_id, date, time_from, time_to, purpose, created_by)
-        VALUES (${parseInt(data.roomId)}, ${data.date}, ${data.timeFrom}, ${data.timeTo}, ${data.purpose}, ${data.createdBy})
-        RETURNING id, room_id as "roomId", date, time_from as "timeFrom", time_to as "timeTo", purpose, created_by as "createdBy", created_at as "createdAt"
+        INSERT INTO bookings (room_id, date, time_from, time_to, purpose, is_priority, created_by)
+        VALUES (${parseInt(data.roomId)}, ${data.date}, ${data.timeFrom}, ${data.timeTo}, ${data.purpose}, ${data.isPriority}, ${data.createdBy})
+        RETURNING id, room_id as "roomId", date, time_from as "timeFrom", time_to as "timeTo", purpose, is_priority as "isPriority", created_by as "createdBy", created_at as "createdAt"
     `;
 
     const b = result[0];
     const room = await getRoomById(data.roomId);
+
+    return {
+        success: true,
+        booking: {
+            ...b,
+            id: String(b.id),
+            roomId: String(b.roomId),
+            roomName: room?.name,
+            timeFrom: b.timeFrom.substring(0, 5),
+            timeTo: b.timeTo.substring(0, 5),
+        } as Booking
+    };
+}
+
+export async function updateBooking(
+    id: string,
+    data: {
+        roomId?: string;
+        date?: string;
+        timeFrom?: string;
+        timeTo?: string;
+        purpose?: string;
+        isPriority?: boolean;
+    }
+): Promise<{ success: boolean; booking?: Booking; error?: string }> {
+    // Get current booking
+    const current = await getBookingById(id);
+    if (!current) {
+        return { success: false, error: 'Booking tidak ditemukan' };
+    }
+
+    // Use current values if not provided
+    const roomId = data.roomId || current.roomId;
+    const date = data.date || current.date;
+    const timeFrom = data.timeFrom || current.timeFrom;
+    const timeTo = data.timeTo || current.timeTo;
+    const purpose = data.purpose !== undefined ? data.purpose : current.purpose;
+    const isPriority = data.isPriority !== undefined ? data.isPriority : current.isPriority;
+
+    // Check for conflicts (excluding current booking)
+    const conflicts = await sql`
+        SELECT id FROM bookings
+        WHERE room_id = ${parseInt(roomId)} 
+        AND date = ${date}
+        AND id != ${parseInt(id)}
+        AND (
+            (time_from < ${timeTo} AND time_to > ${timeFrom})
+        )
+    `;
+
+    if (conflicts.length > 0) {
+        return { success: false, error: 'Ruangan sudah dibooking pada waktu tersebut' };
+    }
+
+    // Update booking
+    const result = await sql`
+        UPDATE bookings
+        SET 
+            room_id = ${parseInt(roomId)},
+            date = ${date},
+            time_from = ${timeFrom},
+            time_to = ${timeTo},
+            purpose = ${purpose},
+            is_priority = ${isPriority}
+        WHERE id = ${parseInt(id)}
+        RETURNING id, room_id as "roomId", date, time_from as "timeFrom", time_to as "timeTo", purpose, is_priority as "isPriority", created_by as "createdBy", created_at as "createdAt"
+    `;
+
+    const b = result[0];
+    const room = await getRoomById(roomId);
 
     return {
         success: true,

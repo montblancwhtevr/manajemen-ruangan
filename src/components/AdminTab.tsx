@@ -23,6 +23,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
         timeFrom: '',
         timeTo: '',
         purpose: '',
+        isPriority: false,
     });
 
     // Room form state
@@ -33,6 +34,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
     });
 
     const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+    const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
     const [loading, setLoading] = useState(false);
 
     // Modal state
@@ -68,11 +70,13 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
     const [roomSearch, setRoomSearch] = useState('');
     const [bookingPage, setBookingPage] = useState(1);
     const [roomPage, setRoomPage] = useState(1);
+    const [showPastBookings, setShowPastBookings] = useState(false);
     const itemsPerPage = 10;
 
     const datePickerRef = useRef<any>(null);
     const timeFromPickerRef = useRef<any>(null);
     const timeToPickerRef = useRef<any>(null);
+    const bookingFormRef = useRef<HTMLDivElement>(null);
 
     // Create Booking
     const handleCreateBooking = async (e: React.FormEvent) => {
@@ -96,10 +100,47 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                     timeFrom: '',
                     timeTo: '',
                     purpose: '',
+                    isPriority: false,
                 });
                 onRefresh();
             } else {
                 showModal('error', 'Gagal', data.error || 'Gagal membuat booking');
+            }
+        } catch (error) {
+            showModal('error', 'Terjadi Kesalahan', String(error));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Update Booking
+    const handleUpdateBooking = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingBooking) return;
+
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/bookings/${editingBooking.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    roomId: editingBooking.roomId,
+                    date: editingBooking.date,
+                    timeFrom: editingBooking.timeFrom,
+                    timeTo: editingBooking.timeTo,
+                    purpose: editingBooking.purpose,
+                    isPriority: editingBooking.isPriority,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showModal('success', 'Berhasil', 'Booking berhasil diupdate!');
+                setEditingBooking(null);
+                onRefresh();
+            } else {
+                showModal('error', 'Gagal', data.error || 'Gagal mengupdate booking');
             }
         } catch (error) {
             showModal('error', 'Terjadi Kesalahan', String(error));
@@ -230,10 +271,19 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
     };
 
     // Filter and Paginate Bookings
-    const filteredBookings = bookings.filter(b =>
-        (b.roomName || '').toLowerCase().includes(bookingSearch.toLowerCase()) ||
-        (b.purpose || '').toLowerCase().includes(bookingSearch.toLowerCase())
-    );
+    const today = new Date().toISOString().split('T')[0];
+    const filteredBookings = bookings.filter(b => {
+        // Filter by search term
+        const matchesSearch = (b.roomName || '').toLowerCase().includes(bookingSearch.toLowerCase()) ||
+            (b.purpose || '').toLowerCase().includes(bookingSearch.toLowerCase());
+
+        // Filter by date (hide past bookings unless toggle is on)
+        const bookingDate = b.date.includes('T') ? b.date.split('T')[0] : b.date;
+        const isFuture = bookingDate >= today;
+        const matchesDateFilter = showPastBookings || isFuture;
+
+        return matchesSearch && matchesDateFilter;
+    });
 
     const totalBookingPages = Math.ceil(filteredBookings.length / itemsPerPage);
     const paginatedBookings = filteredBookings.slice(
@@ -255,17 +305,23 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
 
     return (
         <div className="grid gap-3">
-            {/* Create Booking Form */}
-            <div className="card">
-                <h3 className="mb-3">Buat Booking Baru</h3>
-                <form onSubmit={handleCreateBooking}>
+            {/* Create/Edit Booking Form */}
+            <div className="card" ref={bookingFormRef}>
+                <h3 className="mb-3">{editingBooking ? 'Edit Booking' : 'Buat Booking Baru'}</h3>
+                <form onSubmit={editingBooking ? handleUpdateBooking : handleCreateBooking}>
                     <div className="grid grid-2 gap-2">
                         <div className="form-group">
                             <label className="label">Ruangan *</label>
                             <select
                                 className="select"
-                                value={newBooking.roomId}
-                                onChange={(e) => setNewBooking({ ...newBooking, roomId: e.target.value })}
+                                value={editingBooking ? editingBooking.roomId : newBooking.roomId}
+                                onChange={(e) => {
+                                    if (editingBooking) {
+                                        setEditingBooking({ ...editingBooking, roomId: e.target.value });
+                                    } else {
+                                        setNewBooking({ ...newBooking, roomId: e.target.value });
+                                    }
+                                }}
                                 required
                             >
                                 <option value="">Pilih Ruangan</option>
@@ -283,10 +339,15 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                     dateFormat: 'Y-m-d',
                                     minDate: 'today',
                                 }}
-                                value={newBooking.date}
+                                value={editingBooking ? editingBooking.date : newBooking.date}
                                 onChange={(dates) => {
                                     if (dates[0]) {
-                                        setNewBooking({ ...newBooking, date: dates[0].toISOString().split('T')[0] });
+                                        const formatted = dates[0].toISOString().split('T')[0];
+                                        if (editingBooking) {
+                                            setEditingBooking({ ...editingBooking, date: formatted });
+                                        } else {
+                                            setNewBooking({ ...newBooking, date: formatted });
+                                        }
                                     }
                                 }}
                                 className="input"
@@ -306,12 +367,17 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                     time_24hr: true,
                                     disableMobile: true,
                                 }}
-                                value={newBooking.timeFrom}
+                                value={editingBooking ? editingBooking.timeFrom : newBooking.timeFrom}
                                 onChange={(dates) => {
                                     if (dates[0]) {
                                         const hours = dates[0].getHours().toString().padStart(2, '0');
                                         const minutes = dates[0].getMinutes().toString().padStart(2, '0');
-                                        setNewBooking({ ...newBooking, timeFrom: `${hours}:${minutes}` });
+                                        const time = `${hours}:${minutes}`;
+                                        if (editingBooking) {
+                                            setEditingBooking({ ...editingBooking, timeFrom: time });
+                                        } else {
+                                            setNewBooking({ ...newBooking, timeFrom: time });
+                                        }
                                     }
                                 }}
                                 className="input"
@@ -331,12 +397,17 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                     time_24hr: true,
                                     disableMobile: true,
                                 }}
-                                value={newBooking.timeTo}
+                                value={editingBooking ? editingBooking.timeTo : newBooking.timeTo}
                                 onChange={(dates) => {
                                     if (dates[0]) {
                                         const hours = dates[0].getHours().toString().padStart(2, '0');
                                         const minutes = dates[0].getMinutes().toString().padStart(2, '0');
-                                        setNewBooking({ ...newBooking, timeTo: `${hours}:${minutes}` });
+                                        const time = `${hours}:${minutes}`;
+                                        if (editingBooking) {
+                                            setEditingBooking({ ...editingBooking, timeTo: time });
+                                        } else {
+                                            setNewBooking({ ...newBooking, timeTo: time });
+                                        }
                                     }
                                 }}
                                 className="input"
@@ -347,31 +418,107 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                     </div>
 
                     <div className="form-group">
+                        <label className="label">Prioritas *</label>
+                        <div style={{ display: 'flex', gap: '20px', marginTop: '8px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                <input
+                                    type="radio"
+                                    name="priority"
+                                    checked={editingBooking ? editingBooking.isPriority === true : newBooking.isPriority === true}
+                                    onChange={() => {
+                                        if (editingBooking) {
+                                            setEditingBooking({ ...editingBooking, isPriority: true });
+                                        } else {
+                                            setNewBooking({ ...newBooking, isPriority: true });
+                                        }
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                    required
+                                />
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{
+                                        display: 'inline-block',
+                                        width: '16px',
+                                        height: '16px',
+                                        backgroundColor: '#22c55e',
+                                        borderRadius: '3px'
+                                    }}></span>
+                                    Prioritas
+                                </span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                <input
+                                    type="radio"
+                                    name="priority"
+                                    checked={editingBooking ? editingBooking.isPriority === false : newBooking.isPriority === false}
+                                    onChange={() => {
+                                        if (editingBooking) {
+                                            setEditingBooking({ ...editingBooking, isPriority: false });
+                                        } else {
+                                            setNewBooking({ ...newBooking, isPriority: false });
+                                        }
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                    required
+                                />
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{
+                                        display: 'inline-block',
+                                        width: '16px',
+                                        height: '16px',
+                                        backgroundColor: '#eab308',
+                                        borderRadius: '3px'
+                                    }}></span>
+                                    Non-Prioritas
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="form-group">
                         <label className="label">Keperluan</label>
                         <textarea
                             className="textarea"
                             rows={3}
-                            value={newBooking.purpose}
-                            onChange={(e) => setNewBooking({ ...newBooking, purpose: e.target.value })}
+                            value={editingBooking ? editingBooking.purpose : newBooking.purpose}
+                            onChange={(e) => {
+                                if (editingBooking) {
+                                    setEditingBooking({ ...editingBooking, purpose: e.target.value });
+                                } else {
+                                    setNewBooking({ ...newBooking, purpose: e.target.value });
+                                }
+                            }}
                             placeholder="Masukkan keperluan booking (opsional)"
                         />
                     </div>
 
-                    <button type="submit" className="btn btn-primary" disabled={loading}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            {loading ? <LoadingSpinner size="sm" /> : <FiPlus />}
-                            {loading ? 'Memproses...' : 'Buat Booking'}
-                        </div>
-                    </button>
+                    <div className="flex gap-2">
+                        <button type="submit" className="btn btn-primary" disabled={loading}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {loading ? <LoadingSpinner size="sm" /> : (editingBooking ? <FiSave /> : <FiPlus />)}
+                                {loading ? 'Memproses...' : (editingBooking ? 'Update Booking' : 'Buat Booking')}
+                            </div>
+                        </button>
+                        {editingBooking && (
+                            <button
+                                type="button"
+                                onClick={() => setEditingBooking(null)}
+                                className="btn btn-secondary"
+                            >
+                                Batal
+                            </button>
+                        )}
+                    </div>
                 </form>
             </div>
 
             {/* Manage Bookings */}
             <div className="card">
-                <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-                    <h3 style={{ margin: 0 }}>Kelola Booking</h3>
-                    <div className="relative" style={{ width: '100%', maxWidth: '300px' }}>
-                        <FiSearch className="absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <h3 className="mb-3">Kelola Booking</h3>
+
+                <div className="mb-3">
+                    <div className="relative" style={{ maxWidth: '400px' }}>
+                        {/* <FiSearch className="absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} /> */}
                         <input
                             type="text"
                             className="input"
@@ -386,6 +533,21 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                     </div>
                 </div>
 
+                <div className="mb-3">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                        <input
+                            type="checkbox"
+                            checked={showPastBookings}
+                            onChange={(e) => {
+                                setShowPastBookings(e.target.checked);
+                                setBookingPage(1);
+                            }}
+                            style={{ cursor: 'pointer' }}
+                        />
+                        <span>Tampilkan booking yang sudah lewat</span>
+                    </label>
+                </div>
+
                 {filteredBookings.length === 0 ? (
                     <p className="text-muted text-center">Data tidak ditemukan</p>
                 ) : (
@@ -398,6 +560,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                         <th>Tanggal</th>
                                         <th>Waktu</th>
                                         <th>Keperluan</th>
+                                        <th style={{ width: '50px', textAlign: 'center' }}>Prio</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -408,14 +571,41 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                             <td>{formatDateIndonesian(booking.date)}</td>
                                             <td>{booking.timeFrom} - {booking.timeTo}</td>
                                             <td>{booking.purpose}</td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                <div
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        width: '12px',
+                                                        height: '12px',
+                                                        backgroundColor: booking.isPriority ? '#22c55e' : '#eab308',
+                                                        borderRadius: '50%',
+                                                        boxShadow: '0 0 5px rgba(0,0,0,0.1)'
+                                                    }}
+                                                    title={booking.isPriority ? 'Prioritas' : 'Non-Prioritas'}
+                                                ></div>
+                                            </td>
                                             <td>
-                                                <button
-                                                    onClick={() => handleDeleteBooking(booking.id)}
-                                                    className="btn btn-danger btn-sm"
-                                                    disabled={loading}
-                                                >
-                                                    <FiTrash2 />
-                                                </button>
+                                                <div className="flex gap-1">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingBooking(booking);
+                                                            setTimeout(() => {
+                                                                bookingFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                            }, 100);
+                                                        }}
+                                                        className="btn btn-secondary btn-sm"
+                                                        disabled={loading}
+                                                    >
+                                                        <FiEdit2 />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteBooking(booking.id)}
+                                                        className="btn btn-danger btn-sm"
+                                                        disabled={loading}
+                                                    >
+                                                        <FiTrash2 />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -533,10 +723,11 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                 </form>
 
                 {/* Room List */}
-                <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-                    <h4 style={{ margin: 0 }}>Daftar Ruangan</h4>
-                    <div className="relative" style={{ width: '100%', maxWidth: '300px' }}>
-                        <FiSearch className="absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <h4 className="mb-3">Daftar Ruangan</h4>
+
+                <div className="mb-3">
+                    <div className="relative" style={{ maxWidth: '400px' }}>
+                        {/* <FiSearch className="absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} /> */}
                         <input
                             type="text"
                             className="input"

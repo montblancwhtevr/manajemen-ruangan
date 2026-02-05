@@ -6,6 +6,7 @@ import DateRangePicker from './DateRangePicker';
 import RoomSelector from './RoomSelector';
 import Calendar from './Calendar';
 import RoomList from './RoomList';
+import DateBookingDetails from './DateBookingDetails';
 import type { Room, Booking } from '@/types';
 import { formatDate } from '@/lib/utils';
 
@@ -19,6 +20,7 @@ export default function KetersediaanTab({ rooms, allBookings }: KetersediaanTabP
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [filteredBookings, setFilteredBookings] = useState<Booking[]>(allBookings);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
     const handleSearch = (from: string, to: string) => {
         setDateFrom(from);
@@ -61,10 +63,19 @@ export default function KetersediaanTab({ rooms, allBookings }: KetersediaanTabP
                     <Calendar
                         rooms={rooms}
                         bookings={filteredBookings}
+                        onDateClick={(date) => setSelectedDate(date)}
                     />
                 </div>
 
                 <div>
+                    {selectedDate && (
+                        <DateBookingDetails
+                            selectedDate={selectedDate}
+                            rooms={rooms}
+                            bookings={allBookings}
+                            onClose={() => setSelectedDate(null)}
+                        />
+                    )}
                     <h3 className="mb-2">Daftar Ruangan</h3>
                     <RoomList
                         rooms={displayedRooms}

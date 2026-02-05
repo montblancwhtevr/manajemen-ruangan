@@ -14,9 +14,10 @@ const INDONESIAN_MONTHS = [
 interface CalendarProps {
     rooms: Room[];
     bookings: Booking[];
+    onDateClick?: (date: Date) => void;
 }
 
-export default function Calendar({ rooms, bookings }: CalendarProps) {
+export default function Calendar({ rooms, bookings, onDateClick }: CalendarProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
     const monthStart = startOfMonth(currentMonth);
@@ -26,7 +27,7 @@ export default function Calendar({ rooms, bookings }: CalendarProps) {
     // Get first day of month (0 = Sunday, 1 = Monday, etc.)
     const firstDayOfMonth = monthStart.getDay();
 
-    // Adjust for Monday start (0 = Monday, 6 = Sunday)
+    // Monday start (0 = Monday, 6 = Sunday) - adjust from JS getDay() which uses Sunday=0
     const startPadding = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
     const getBookingsOnDate = (date: Date) => {
@@ -44,7 +45,7 @@ export default function Calendar({ rooms, bookings }: CalendarProps) {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
     };
 
-    const dayHeaders = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const dayHeaders = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
     return (
         <div className="calendar">
@@ -86,7 +87,12 @@ export default function Calendar({ rooms, bookings }: CalendarProps) {
                         <div
                             key={day.toISOString()}
                             className={`calendar-day ${(!isCurrentMonth || isPast) ? 'disabled' : ''} ${isTodayDate ? 'today' : ''}`}
-                            style={{ cursor: 'default' }}
+                            style={{ cursor: (!isCurrentMonth || isPast) ? 'default' : 'pointer' }}
+                            onClick={() => {
+                                if (isCurrentMonth && !isPast && onDateClick) {
+                                    onDateClick(day);
+                                }
+                            }}
                         >
                             <span className="day-number">{format(day, 'd')}</span>
                             <div className="day-indicators">
