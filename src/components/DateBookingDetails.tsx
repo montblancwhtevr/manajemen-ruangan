@@ -83,7 +83,9 @@ export default function DateBookingDetails({ selectedDate, rooms, bookings, onCl
                                                 background: 'var(--bg-primary)',
                                                 borderRadius: 'var(--radius-sm)',
                                                 fontSize: '0.9rem',
-                                                borderLeft: `4px solid ${booking.isPriority ? '#22c55e' : '#eab308'}`,
+                                                borderLeft: `4px solid ${booking.bookingType === 'prioritas' ? '#ef4444' :
+                                                        booking.bookingType === 'eksternal' ? '#22c55e' : '#eab308'
+                                                    }`,
                                                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                                             }}
                                         >

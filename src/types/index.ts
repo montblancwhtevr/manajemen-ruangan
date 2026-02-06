@@ -21,7 +21,7 @@ export interface Booking {
   timeFrom: string; // HH:mm format
   timeTo: string; // HH:mm format
   purpose: string;
-  isPriority: boolean; // Priority status: true = green, false = yellow
+  bookingType: 'prioritas' | 'internal' | 'eksternal'; // 'prioritas' (red), 'internal' (yellow), 'eksternal' (green)
   createdBy: string;
   createdAt: Date;
 }

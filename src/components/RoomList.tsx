@@ -120,11 +120,12 @@ function RoomDetail({ room }: RoomDetailProps) {
                                                         display: 'inline-block',
                                                         width: '20px',
                                                         height: '20px',
-                                                        backgroundColor: booking.isPriority ? '#22c55e' : '#eab308',
+                                                        backgroundColor: booking.bookingType === 'prioritas' ? '#ef4444' :
+                                                            booking.bookingType === 'eksternal' ? '#22c55e' : '#eab308',
                                                         borderRadius: '4px',
                                                         boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                                     }}
-                                                    title={booking.isPriority ? 'Prioritas' : 'Non-Prioritas'}
+                                                    title={booking.bookingType.charAt(0).toUpperCase() + booking.bookingType.slice(1)}
                                                 ></div>
                                             </td>
                                         </tr>

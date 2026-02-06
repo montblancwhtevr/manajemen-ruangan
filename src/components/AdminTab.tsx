@@ -23,7 +23,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
         timeFrom: '',
         timeTo: '',
         purpose: '',
-        isPriority: false,
+        bookingType: 'internal' as 'prioritas' | 'internal' | 'eksternal',
     });
 
     // Room form state
@@ -100,7 +100,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                     timeFrom: '',
                     timeTo: '',
                     purpose: '',
-                    isPriority: false,
+                    bookingType: 'internal',
                 });
                 onRefresh();
             } else {
@@ -129,7 +129,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                     timeFrom: editingBooking.timeFrom,
                     timeTo: editingBooking.timeTo,
                     purpose: editingBooking.purpose,
-                    isPriority: editingBooking.isPriority,
+                    bookingType: editingBooking.bookingType,
                 }),
             });
 
@@ -418,18 +418,18 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                     </div>
 
                     <div className="form-group">
-                        <label className="label">Prioritas *</label>
-                        <div style={{ display: 'flex', gap: '20px', marginTop: '8px' }}>
+                        <label className="label">Tipe Booking *</label>
+                        <div style={{ display: 'flex', gap: '15px', marginTop: '8px', flexWrap: 'wrap' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                 <input
                                     type="radio"
-                                    name="priority"
-                                    checked={editingBooking ? editingBooking.isPriority === true : newBooking.isPriority === true}
+                                    name="bookingType"
+                                    checked={editingBooking ? editingBooking.bookingType === 'prioritas' : newBooking.bookingType === 'prioritas'}
                                     onChange={() => {
                                         if (editingBooking) {
-                                            setEditingBooking({ ...editingBooking, isPriority: true });
+                                            setEditingBooking({ ...editingBooking, bookingType: 'prioritas' });
                                         } else {
-                                            setNewBooking({ ...newBooking, isPriority: true });
+                                            setNewBooking({ ...newBooking, bookingType: 'prioritas' });
                                         }
                                     }}
                                     style={{ cursor: 'pointer' }}
@@ -440,7 +440,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                         display: 'inline-block',
                                         width: '16px',
                                         height: '16px',
-                                        backgroundColor: '#22c55e',
+                                        backgroundColor: '#ef4444',
                                         borderRadius: '3px'
                                     }}></span>
                                     Prioritas
@@ -449,13 +449,13 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                 <input
                                     type="radio"
-                                    name="priority"
-                                    checked={editingBooking ? editingBooking.isPriority === false : newBooking.isPriority === false}
+                                    name="bookingType"
+                                    checked={editingBooking ? editingBooking.bookingType === 'internal' : newBooking.bookingType === 'internal'}
                                     onChange={() => {
                                         if (editingBooking) {
-                                            setEditingBooking({ ...editingBooking, isPriority: false });
+                                            setEditingBooking({ ...editingBooking, bookingType: 'internal' });
                                         } else {
-                                            setNewBooking({ ...newBooking, isPriority: false });
+                                            setNewBooking({ ...newBooking, bookingType: 'internal' });
                                         }
                                     }}
                                     style={{ cursor: 'pointer' }}
@@ -469,7 +469,33 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                         backgroundColor: '#eab308',
                                         borderRadius: '3px'
                                     }}></span>
-                                    Non-Prioritas
+                                    Internal
+                                </span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                <input
+                                    type="radio"
+                                    name="bookingType"
+                                    checked={editingBooking ? editingBooking.bookingType === 'eksternal' : newBooking.bookingType === 'eksternal'}
+                                    onChange={() => {
+                                        if (editingBooking) {
+                                            setEditingBooking({ ...editingBooking, bookingType: 'eksternal' });
+                                        } else {
+                                            setNewBooking({ ...newBooking, bookingType: 'eksternal' });
+                                        }
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                    required
+                                />
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span style={{
+                                        display: 'inline-block',
+                                        width: '16px',
+                                        height: '16px',
+                                        backgroundColor: '#22c55e',
+                                        borderRadius: '3px'
+                                    }}></span>
+                                    Eksternal
                                 </span>
                             </label>
                         </div>
@@ -560,7 +586,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                         <th>Tanggal</th>
                                         <th>Waktu</th>
                                         <th>Keperluan</th>
-                                        <th style={{ width: '50px', textAlign: 'center' }}>Prio</th>
+                                        <th style={{ width: '50px', textAlign: 'center' }}>Tipe</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -577,11 +603,12 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                                         display: 'inline-block',
                                                         width: '12px',
                                                         height: '12px',
-                                                        backgroundColor: booking.isPriority ? '#22c55e' : '#eab308',
+                                                        backgroundColor: booking.bookingType === 'prioritas' ? '#ef4444' :
+                                                            booking.bookingType === 'eksternal' ? '#22c55e' : '#eab308',
                                                         borderRadius: '50%',
                                                         boxShadow: '0 0 5px rgba(0,0,0,0.1)'
                                                     }}
-                                                    title={booking.isPriority ? 'Prioritas' : 'Non-Prioritas'}
+                                                    title={booking.bookingType.charAt(0).toUpperCase() + booking.bookingType.slice(1)}
                                                 ></div>
                                             </td>
                                             <td>

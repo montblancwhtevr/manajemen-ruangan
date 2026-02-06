@@ -47,7 +47,7 @@ export async function PUT(
             timeFrom: body.timeFrom,
             timeTo: body.timeTo,
             purpose: body.purpose,
-            isPriority: body.isPriority,
+            bookingType: body.bookingType,
         });
 
         if (!result.success) {
