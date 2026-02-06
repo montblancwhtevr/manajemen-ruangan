@@ -342,7 +342,12 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                 value={editingBooking ? editingBooking.date : newBooking.date}
                                 onChange={(dates) => {
                                     if (dates[0]) {
-                                        const formatted = dates[0].toISOString().split('T')[0];
+                                        const d = dates[0];
+                                        const year = d.getFullYear();
+                                        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+                                        const day = d.getDate().toString().padStart(2, '0');
+                                        const formatted = `${year}-${month}-${day}`;
+
                                         if (editingBooking) {
                                             setEditingBooking({ ...editingBooking, date: formatted });
                                         } else {
