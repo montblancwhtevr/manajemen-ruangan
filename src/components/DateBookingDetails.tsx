@@ -3,7 +3,7 @@
 import { format } from 'date-fns';
 import { FiX } from 'react-icons/fi';
 import type { Room, Booking } from '@/types';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatDateIndonesian, getBookingTypeColor } from '@/lib/utils';
 
 interface DateBookingDetailsProps {
     selectedDate: Date;
@@ -83,9 +83,7 @@ export default function DateBookingDetails({ selectedDate, rooms, bookings, onCl
                                                 background: 'var(--bg-primary)',
                                                 borderRadius: 'var(--radius-sm)',
                                                 fontSize: '0.9rem',
-                                                borderLeft: `4px solid ${booking.bookingType === 'prioritas' ? '#ef4444' :
-                                                        booking.bookingType === 'eksternal' ? '#22c55e' : '#eab308'
-                                                    }`,
+                                                borderLeft: `4px solid ${getBookingTypeColor(booking.bookingType)}`,
                                                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                                             }}
                                         >

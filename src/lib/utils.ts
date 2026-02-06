@@ -96,3 +96,27 @@ export function getCurrentDate(): string {
 export function getCurrentTime(): string {
     return format(new Date(), 'HH:mm');
 }
+
+/**
+ * Priority color configuration
+ */
+export const PRIORITY_COLORS = {
+    prioritas: '#1e3fd3ff',
+    internal: '#292929ff',
+    eksternal: '#f0f00bff',
+} as const;
+
+/**
+ * Get color for booking type
+ */
+export function getBookingTypeColor(type: string): string {
+    switch (type) {
+        case 'prioritas':
+            return PRIORITY_COLORS.prioritas;
+        case 'eksternal':
+            return PRIORITY_COLORS.eksternal;
+        case 'internal':
+        default:
+            return PRIORITY_COLORS.internal;
+    }
+}

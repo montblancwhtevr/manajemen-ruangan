@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { FiChevronDown, FiChevronUp, FiClock, FiCalendar, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { formatDateIndonesian } from '@/lib/utils';
+import { formatDateIndonesian, getBookingTypeColor } from '@/lib/utils';
 import type { Room, Booking } from '@/types';
 
 interface RoomDetailProps {
@@ -120,8 +120,7 @@ function RoomDetail({ room }: RoomDetailProps) {
                                                         display: 'inline-block',
                                                         width: '20px',
                                                         height: '20px',
-                                                        backgroundColor: booking.bookingType === 'prioritas' ? '#ef4444' :
-                                                            booking.bookingType === 'eksternal' ? '#22c55e' : '#eab308',
+                                                        backgroundColor: getBookingTypeColor(booking.bookingType),
                                                         borderRadius: '4px',
                                                         boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                                     }}

@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { FiPlus, FiTrash2, FiEdit2, FiSave, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Flatpickr from 'react-flatpickr';
 import 'flatpickr/dist/flatpickr.css';
-import { formatDateIndonesian } from '@/lib/utils';
+import { formatDateIndonesian, getBookingTypeColor, PRIORITY_COLORS } from '@/lib/utils';
 import type { Room, Booking } from '@/types';
 import Modal, { ModalType } from './Modal';
 import LoadingSpinner from './LoadingSpinner';
@@ -445,7 +445,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                         display: 'inline-block',
                                         width: '16px',
                                         height: '16px',
-                                        backgroundColor: '#ef4444',
+                                        backgroundColor: PRIORITY_COLORS.prioritas,
                                         borderRadius: '3px'
                                     }}></span>
                                     Prioritas
@@ -471,7 +471,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                         display: 'inline-block',
                                         width: '16px',
                                         height: '16px',
-                                        backgroundColor: '#eab308',
+                                        backgroundColor: PRIORITY_COLORS.internal,
                                         borderRadius: '3px'
                                     }}></span>
                                     Internal
@@ -497,7 +497,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                         display: 'inline-block',
                                         width: '16px',
                                         height: '16px',
-                                        backgroundColor: '#22c55e',
+                                        backgroundColor: PRIORITY_COLORS.eksternal,
                                         borderRadius: '3px'
                                     }}></span>
                                     Eksternal
@@ -608,8 +608,7 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                                         display: 'inline-block',
                                                         width: '12px',
                                                         height: '12px',
-                                                        backgroundColor: booking.bookingType === 'prioritas' ? '#ef4444' :
-                                                            booking.bookingType === 'eksternal' ? '#22c55e' : '#eab308',
+                                                        backgroundColor: getBookingTypeColor(booking.bookingType),
                                                         borderRadius: '50%',
                                                         boxShadow: '0 0 5px rgba(0,0,0,0.1)'
                                                     }}
