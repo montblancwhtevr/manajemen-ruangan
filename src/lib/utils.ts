@@ -103,7 +103,7 @@ export function getCurrentTime(): string {
 export const PRIORITY_COLORS = {
     prioritas: '#1e3fd3ff',
     internal: '#292929ff',
-    eksternal: '#f0f00bff',
+    eksternal: '#ff9800',
 } as const;
 
 /**

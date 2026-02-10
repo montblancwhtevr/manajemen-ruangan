@@ -547,6 +547,24 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
             <div className="card">
                 <h3 className="mb-3">Kelola Booking</h3>
 
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--spacing-md)',
+                    marginBottom: 'var(--spacing-md)',
+                    padding: 'var(--spacing-xs)',
+                    background: 'var(--bg-secondary)',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.85rem'
+                }}>
+                    <span style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Prioritas:</span>
+                    <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+                        <span style={{ color: '#1e3fd3ff', fontWeight: '600' }}>Prioritas</span>
+                        <span style={{ color: '#292929ff', fontWeight: '600' }}>Internal</span>
+                        <span style={{ color: '#ff9800', fontWeight: '600' }}>Eksternal</span>
+                    </div>
+                </div>
+
                 <div className="mb-3">
                     <div className="relative" style={{ maxWidth: '400px' }}>
                         {/* <FiSearch className="absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} /> */}
@@ -591,30 +609,16 @@ export default function AdminTab({ rooms, bookings, onRefresh }: AdminTabProps) 
                                         <th>Tanggal</th>
                                         <th>Waktu</th>
                                         <th>Keperluan</th>
-                                        <th style={{ width: '50px', textAlign: 'center' }}>Tipe</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedBookings.map(booking => (
-                                        <tr key={booking.id}>
+                                        <tr key={booking.id} style={{ color: getBookingTypeColor(booking.bookingType) }}>
                                             <td>{booking.roomName || booking.roomId}</td>
                                             <td>{formatDateIndonesian(booking.date)}</td>
                                             <td>{booking.timeFrom} - {booking.timeTo}</td>
                                             <td>{booking.purpose}</td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <div
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        width: '12px',
-                                                        height: '12px',
-                                                        backgroundColor: getBookingTypeColor(booking.bookingType),
-                                                        borderRadius: '50%',
-                                                        boxShadow: '0 0 5px rgba(0,0,0,0.1)'
-                                                    }}
-                                                    title={booking.bookingType.charAt(0).toUpperCase() + booking.bookingType.slice(1)}
-                                                ></div>
-                                            </td>
                                             <td>
                                                 <div className="flex gap-1">
                                                     <button

@@ -92,14 +92,13 @@ function RoomDetail({ room }: RoomDetailProps) {
                                     <th>Tanggal</th>
                                     <th>Waktu</th>
                                     <th>Keperluan</th>
-                                    <th style={{ width: '60px', textAlign: 'center' }}>Prioritas</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {paginatedBookings.map(booking => {
                                     const isToday = booking.date === new Date().toISOString().split('T')[0];
                                     return (
-                                        <tr key={booking.id} style={isToday ? { background: 'rgba(0, 102, 255, 0.05)' } : {}}>
+                                        <tr key={booking.id} style={{ color: getBookingTypeColor(booking.bookingType), ...(isToday ? { background: 'rgba(0, 102, 255, 0.05)' } : {}) }}>
                                             <td>
                                                 <div className="flex items-center gap-2">
                                                     <FiCalendar className="text-muted" />
@@ -114,19 +113,6 @@ function RoomDetail({ room }: RoomDetailProps) {
                                                 </div>
                                             </td>
                                             <td>{booking.purpose}</td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <div
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        width: '20px',
-                                                        height: '20px',
-                                                        backgroundColor: getBookingTypeColor(booking.bookingType),
-                                                        borderRadius: '4px',
-                                                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                                                    }}
-                                                    title={booking.bookingType.charAt(0).toUpperCase() + booking.bookingType.slice(1)}
-                                                ></div>
-                                            </td>
                                         </tr>
                                     );
                                 })}

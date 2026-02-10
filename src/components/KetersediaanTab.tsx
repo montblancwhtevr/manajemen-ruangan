@@ -76,6 +76,25 @@ export default function KetersediaanTab({ rooms, allBookings }: KetersediaanTabP
                             onClose={() => setSelectedDate(null)}
                         />
                     )}
+
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 'var(--spacing-md)',
+                        marginBottom: 'var(--spacing-sm)',
+                        padding: 'var(--spacing-xs)',
+                        background: 'var(--bg-secondary)',
+                        borderRadius: 'var(--radius-sm)',
+                        fontSize: '0.85rem'
+                    }}>
+                        <span style={{ fontWeight: '600', color: 'var(--text-secondary)' }}>Prioritas:</span>
+                        <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+                            <span style={{ color: '#1e3fd3ff', fontWeight: '600' }}>Prioritas</span>
+                            <span style={{ color: '#292929ff', fontWeight: '600' }}>Internal</span>
+                            <span style={{ color: '#ff9800', fontWeight: '600' }}>Eksternal</span>
+                        </div>
+                    </div>
+
                     <h3 className="mb-2">Daftar Ruangan</h3>
                     <RoomList
                         rooms={displayedRooms}

@@ -83,13 +83,13 @@ export default function DateBookingDetails({ selectedDate, rooms, bookings, onCl
                                                 background: 'var(--bg-primary)',
                                                 borderRadius: 'var(--radius-sm)',
                                                 fontSize: '0.9rem',
-                                                borderLeft: `4px solid ${getBookingTypeColor(booking.bookingType)}`,
+                                                color: getBookingTypeColor(booking.bookingType),
                                                 boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                                             }}
                                         >
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                                 <strong>{booking.purpose}</strong>
-                                                <span style={{ color: 'var(--text-secondary)' }}>
+                                                <span>
                                                     {booking.timeFrom} - {booking.timeTo}
                                                 </span>
                                             </div>
